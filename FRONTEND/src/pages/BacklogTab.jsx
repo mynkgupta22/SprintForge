@@ -51,8 +51,9 @@ function BacklogTab() {
       const res = await apiHandler({
         url: `sprints/project/${projectId}/status/ACTIVE`,
       });
+      console.log("Active sprint data:", res);
       if (res.success && res.data) {
-        setActiveSprint(res.data);
+        setActiveSprint(res?.data?.[0]);
       }
     } catch (error) {
       console.error("Error fetching active sprint:", error);
@@ -112,7 +113,7 @@ function BacklogTab() {
 
     try {
       const res = await apiHandler({
-        url: `tasks/${taskId}/sprint/${activeSprint.id}`,
+        url: `tasks/${taskId}/move-to-sprint/${activeSprint.id}`,
         method: "POST",
       });
 

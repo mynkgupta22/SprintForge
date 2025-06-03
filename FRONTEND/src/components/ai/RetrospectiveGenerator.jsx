@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { Clock, Loader2, CheckCircle, XCircle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Clock, Loader2, RefreshCw, CheckCircle } from "lucide-react";
 import apiHandler from "../../functions/apiHandler";
 
 export function RetrospectiveGenerator({ selectedProject }) {
@@ -12,6 +12,7 @@ export function RetrospectiveGenerator({ selectedProject }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
+
 
   useEffect(() => {
     if (selectedProject) {
@@ -58,11 +59,10 @@ export function RetrospectiveGenerator({ selectedProject }) {
     setIsLoading(true);
     setRetrospective(null);
     setError(null);
-    setSaved(false);
     
     try {
       const response = await apiHandler({
-        url: "ai/retrospective",
+        url: `api/ai/retrospective`,
         method: "POST",
         data: {
           projectId: selectedProject.id,
@@ -70,8 +70,9 @@ export function RetrospectiveGenerator({ selectedProject }) {
         },
       });
       
-      if (response.success) {
-        setRetrospective(response.data);
+      if (response.success && response.data && response.data.length > 0) {
+        // Take the first item from the array as our retrospective
+        setRetrospective(response.data[0]);
       } else {
         setError(response.error || "Failed to generate retrospective");
       }
@@ -88,38 +89,6 @@ export function RetrospectiveGenerator({ selectedProject }) {
     const sprint = sprints.find(s => s.id === sprintId);
     setSelectedSprint(sprint);
     setRetrospective(null);
-    setSaved(false);
-  };
-
-  const handleSave = async () => {
-    if (!retrospective || !selectedSprint) return;
-    
-    setIsLoading(true);
-    
-    try {
-      // Here you would implement the logic to save the retrospective
-      const response = await apiHandler({
-        url: `sprints/${selectedSprint.id}/retrospective`,
-        method: "POST",
-        data: {
-          content: retrospective.content,
-          whatWentWell: retrospective.whatWentWell,
-          whatWentWrong: retrospective.whatWentWrong,
-          actionItems: retrospective.actionItems,
-        },
-      });
-      
-      if (response.success) {
-        setSaved(true);
-      } else {
-        setError(response.error || "Failed to save retrospective");
-      }
-    } catch (error) {
-      console.error("Error saving retrospective:", error);
-      setError("An unexpected error occurred while saving the retrospective");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleRegenerateSection = async (section) => {
@@ -129,7 +98,7 @@ export function RetrospectiveGenerator({ selectedProject }) {
     
     try {
       const response = await apiHandler({
-        url: "ai/retrospective/regenerate-section",
+        url: "api/ai/retrospective/regenerate-section",
         method: "POST",
         data: {
           projectId: selectedProject.id,
@@ -221,126 +190,90 @@ export function RetrospectiveGenerator({ selectedProject }) {
                 </Badge>
               </div>
 
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">Summary</h4>
-                </div>
-                <div className="bg-muted p-3 rounded-md text-sm">
-                  {retrospective.summary}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <ThumbsUp className="h-4 w-4 text-green-600" />
-                    What Went Well
-                  </h4>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleRegenerateSection('whatWentWell')}
-                    disabled={isLoading}
-                  >
-                    Regenerate
-                  </Button>
-                </div>
-                <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-md text-sm">
-                  <ul className="list-disc list-inside space-y-1">
-                    {retrospective.whatWentWell.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <ThumbsDown className="h-4 w-4 text-red-600" />
-                    What Went Wrong
-                  </h4>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleRegenerateSection('whatWentWrong')}
-                    disabled={isLoading}
-                  >
-                    Regenerate
-                  </Button>
-                </div>
-                <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md text-sm">
-                  <ul className="list-disc list-inside space-y-1">
-                    {retrospective.whatWentWrong.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">Action Items</h4>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleRegenerateSection('actionItems')}
-                    disabled={isLoading}
-                  >
-                    Regenerate
-                  </Button>
-                </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm">
-                  <ul className="list-disc list-inside space-y-1">
-                    {retrospective.actionItems.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h4 className="font-medium mb-2">Statistics</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="border rounded-md p-2 text-center">
-                    <p className="text-xs text-muted-foreground">Completion Rate</p>
-                    <p className="text-lg font-semibold">{retrospective.statistics.completionRate}%</p>
+              <div className="space-y-6">
+                {/* What Went Well */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-green-600">
+                      What Went Well
+                    </h3>
+                    <Button
+                      variant="outline"
+                      size="sm" 
+                      onClick={() => handleRegenerateSection('whatWentWell')}
+                      disabled={isLoading}
+                      className="gap-1"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      <span>Regenerate</span>
+                    </Button>
                   </div>
-                  <div className="border rounded-md p-2 text-center">
-                    <p className="text-xs text-muted-foreground">Tasks Completed</p>
-                    <p className="text-lg font-semibold">{retrospective.statistics.tasksCompleted}/{retrospective.statistics.totalTasks}</p>
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md text-sm">
+                    <p className="whitespace-pre-line">{retrospective.whatWentWell}</p>
                   </div>
-                  <div className="border rounded-md p-2 text-center">
-                    <p className="text-xs text-muted-foreground">Story Points</p>
-                    <p className="text-lg font-semibold">{retrospective.statistics.storyPointsCompleted}/{retrospective.statistics.totalStoryPoints}</p>
+                </div>
+
+                {/* What Didn't Go Well */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-red-600">
+                      What Didn't Go Well
+                    </h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRegenerateSection('whatDidNotGoWell')}
+                      disabled={isLoading}
+                      className="gap-1"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      <span>Regenerate</span>
+                    </Button>
                   </div>
-                  <div className="border rounded-md p-2 text-center">
-                    <p className="text-xs text-muted-foreground">Avg. Cycle Time</p>
-                    <p className="text-lg font-semibold">{retrospective.statistics.averageCycleTime} days</p>
+                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-sm">
+                    <p className="whitespace-pre-line">{retrospective.whatDidNotGoWell}</p>
+                  </div>
+                </div>
+
+                {/* Suggestions */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-blue-600">
+                      Suggestions for Improvement
+                    </h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRegenerateSection('suggestions')}
+                      disabled={isLoading}
+                      className="gap-1"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      <span>Regenerate</span>
+                    </Button>
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md text-sm">
+                    <p className="whitespace-pre-line">{retrospective.suggestions}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              {retrospective.sprintName && (
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Sprint Summary</h4>
+                  <p className="whitespace-pre-line text-sm">{retrospective.sprintName}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end">
                 <Button 
                   variant="outline" 
                   onClick={generateRetrospective}
                   disabled={isLoading}
+                  className="gap-1"
                 >
+                  <RefreshCw className="h-4 w-4" />
                   Regenerate All
-                </Button>
-                <Button 
-                  onClick={handleSave}
-                  disabled={isLoading || saved}
-                >
-                  {saved ? (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Saved
-                    </>
-                  ) : (
-                    "Save Retrospective"
-                  )}
                 </Button>
               </div>
             </div>

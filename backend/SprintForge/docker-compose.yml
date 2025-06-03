@@ -1,0 +1,38 @@
+#version: '3.8'
+
+services:
+  postgres:   # container
+    image: ankane/pgvector:latest  
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: sprintForge
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qtl
+    ports:
+      - "5434:5432"  # host:container  
+    networks:
+      - backend
+    volumes:
+      - postgres-data:/var/lib/postgresql/data    
+
+  app:
+    image: mynkgupta22/sprint_forge:latest # 👈 name your image here
+    container_name: sprint_forge_container
+    ports:
+      - "8082:8080"  # host:container
+    depends_on:
+      - postgres
+    networks:
+      - backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sprintForge
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: qtl
+
+volumes:
+  postgres-data:
+
+networks:
+  backend:
+
+

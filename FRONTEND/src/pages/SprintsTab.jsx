@@ -180,6 +180,7 @@ function SprintsTab() {
         capacity: Number(form.capacity),
         status: form.status,
         description: form.description,
+        projectId: Number(projectId),
       },
     });
     setUpdating(false);

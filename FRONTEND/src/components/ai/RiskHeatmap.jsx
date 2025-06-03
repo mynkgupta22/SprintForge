@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { BarChart, Loader2, AlertTriangle, Users } from "lucide-react";
 import apiHandler from "../../functions/apiHandler";
+import ReactMarkdown from 'react-markdown';
+import { marked } from "marked";
 
 export function RiskHeatmap({ selectedProject }) {
   const [sprints, setSprints] = useState([]);
@@ -59,7 +61,7 @@ export function RiskHeatmap({ selectedProject }) {
     
     try {
       const response = await apiHandler({
-        url: "ai/risk-heatmap",
+        url: "api/ai/risk-heatmap",
         method: "POST",
         data: {
           projectId: selectedProject.id,
@@ -117,6 +119,19 @@ export function RiskHeatmap({ selectedProject }) {
     }
   };
 
+  // Utility function to format object to markdown string
+function objectToMarkdown(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+
+  return Object.entries(obj)
+    .map(([key, value]) => `### ${key}\n\n${value}`)
+    .join('\n\n');
+}
+
+const markdownText = useMemo(() => objectToMarkdown(riskData?.userRiskMap), [riskData]);
+
+const html = useMemo(() => marked(markdownText), [markdownText]);
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -169,94 +184,54 @@ export function RiskHeatmap({ selectedProject }) {
             <div className="border rounded-md p-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Risk Analysis</h3>
-                <Badge 
-                  variant={getRiskBadgeVariant(riskData.overallRisk)}
-                >
-                  {riskData.overallRisk} Overall Risk
+                <Badge variant="outline" className="bg-green-500/20 text-green-700 border-green-300">
+                  Analysis Complete
                 </Badge>
-              </div>
-
-              <div className="mb-6">
-                <p className="text-sm mb-4">{riskData.summary}</p>
               </div>
 
               <div className="mb-6">
                 <h4 className="font-medium mb-3 flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Team Member Workload
+                  Team Member Risk Assessment
                 </h4>
                 <div className="space-y-4">
-                  {riskData.memberRisks.map((member, index) => (
-                    <div key={index} className="border rounded-md p-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{member.name}</span>
+                  {/* {Object.entries(riskData).map(([name, details]) => {
+                    // Skip non-member entries
+                    if (typeof details !== 'string' || name.startsWith('*') || name === 'Here\'s the analysis' || name === '**Output') {
+                      return null;
+                    }
+                    
+                    // Extract risk level and reason
+                    const riskMatch = details.match(/\*\*(.*?)\*\*\s*(.*)/);
+                    if (!riskMatch) return null;
+                    
+                    const riskLevel = riskMatch[1].toLowerCase();
+                    const riskReason = riskMatch[2];
+                    
+                    return (
+                      <div key={name} className="border rounded-md p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{name.replace('*', '').trim()}</span>
+                          </div>
+                          <Badge variant={getRiskBadgeVariant(riskLevel)}>
+                            {riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk
+                          </Badge>
                         </div>
-                        <Badge variant={getRiskBadgeVariant(member.riskLevel)}>
-                          {member.riskLevel} Risk
-                        </Badge>
-                      </div>
-                      <div className="text-sm space-y-1">
-                        <p>Assigned Tasks: {member.assignedTasks}</p>
-                        <p>Story Points: {member.storyPoints}</p>
-                        <p>Estimated Hours: {member.estimatedHours}</p>
-                      </div>
-                      <div className="mt-2 text-sm">
-                        <p className="font-medium">Risk Factors:</p>
-                        <ul className="list-disc list-inside">
-                          {member.riskFactors.map((factor, i) => (
-                            <li key={i}>{factor}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h4 className="font-medium mb-3">High-Risk Tasks</h4>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {riskData.riskTasks.map((task, index) => (
-                    <div 
-                      key={index} 
-                      className={`border rounded p-3 text-sm ${getRiskCardClass(task.riskLevel)}`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">{task.title}</p>
-                          <p className="text-xs mt-1">Assigned to: {task.assignee}</p>
+                        <div className="text-sm">
+                          <p>{riskReason}</p>
                         </div>
-                        <Badge variant={getRiskBadgeVariant(task.riskLevel)}>
-                          {task.riskLevel}
-                        </Badge>
                       </div>
-                      <div className="mt-2">
-                        <p className="text-xs font-medium">Risk Factors:</p>
-                        <ul className="list-disc list-inside text-xs">
-                          {task.riskFactors.map((factor, i) => (
-                            <li key={i}>{factor}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  ))}
-                  {riskData.riskTasks.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No high-risk tasks identified</p>
-                  )}
+                    );
+                  })} */}
+<div
+      className="prose max-w-none"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
                 </div>
-              </div>
-
-              <div className="bg-muted p-3 rounded-md">
-                <h4 className="font-medium mb-2">Recommendations</h4>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  {riskData.recommendations.map((rec, index) => (
-                    <li key={index}>{rec}</li>
-                  ))}
-                </ul>
               </div>
             </div>
           )}

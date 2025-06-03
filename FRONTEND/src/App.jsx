@@ -32,6 +32,7 @@ import AIFeaturesTab from "./pages/AIFeaturesTab";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/signup";
+import HomePage from "./pages/HomePage";
 
 function AppLayout() {
   const location = useLocation();
@@ -55,13 +56,13 @@ function AppLayout() {
         {!isAuthRoute && <Topbar />}
         <div className="flex-1">
           <Routes>
+            <Route path="/" element={<HomePage />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Signup />} />
             <Route
               path="/auth/*"
               element={<Navigate replace to="/auth/login" />}
             />
-            <Route path="/" element={<Navigate replace to="/workspaces" />} />
             {/* <Route
               path="/workspaces"
               element={

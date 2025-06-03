@@ -60,7 +60,9 @@ function BoardTab() {
     description: "",
     assignee: "",
     priority: "MEDIUM",
+    status: "BACKLOG",
     dueDate: "",
+    estimate: "",
   });
   const [showDetail, setShowDetail] = useState(false);
   const [detailTask, setDetailTask] = useState(null);
@@ -211,32 +213,39 @@ function BoardTab() {
   const handleCreate = async (e) => {
     e.preventDefault();
     setCreating(true);
-    const res = await apiHandler({
-      url: "tasks",
-      method: "POST",
-      data: {
-        ...form,
-        projectId: Number(projectId),
-      },
-    });
-    setCreating(false);
-    if (res.success) {
-      setShowModal(false);
-      setForm({
-        title: "",
-        description: "",
-        assignee: "",
-        priority: "MEDIUM",
-        status: "BACKLOG",
-        dueDate: "",
+    try {
+      const res = await apiHandler({
+        url: "tasks",
+        method: "POST",
+        data: {
+          ...form,
+          estimate: Number(form?.estimate || 0),
+          projectId: Number(projectId),
+        },
       });
+      
+      if (res.success) {
+        setShowModal(false);
+        setForm({
+          title: "",
+          description: "",
+          assignee: "",
+          priority: "MEDIUM",
+          status: "BACKLOG",
+          dueDate: "",
+        });
 
-      // Refresh the appropriate task list based on the created task's status
-      if (form.status === "BACKLOG") {
-        fetchBacklogTasks();
-      } else if (activeSprint) {
-        fetchSprintTasks(activeSprint.id);
+        // Always refresh both lists to ensure consistency
+        await fetchBacklogTasks();
+        if (activeSprint) {
+          await fetchSprintTasks(activeSprint.id);
+        }
+        return res;
       }
+    } catch (error) {
+      console.error("Error creating task:", error);
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -576,15 +585,42 @@ function BoardTab() {
               </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input
-                id="dueDate"
-                name="dueDate"
-                type="date"
-                value={form.dueDate}
-                onChange={handleInput}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="dueDate">Due Date</Label>
+                <Input
+                  id="dueDate"
+                  name="dueDate"
+                  type="date"
+                  value={form.dueDate}
+                  onChange={handleInput}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="estimate">Estimate</Label>
+                <div className="relative">
+                  <Input
+                    id="estimate"
+                    name="estimate"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={form.estimate}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers and one decimal point
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setForm(prev => ({ ...prev, estimate: value }));
+                      }
+                    }}
+                    placeholder="0.0"
+                    className="pr-8"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    h
+                  </span>
+                </div>
+              </div>
             </div>
 
             <DialogFooter className="mt-4">

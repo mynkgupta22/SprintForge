@@ -16,6 +16,7 @@ import {
   LogOut,
   Settings,
   User as UserIcon,
+  Folder,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
@@ -51,7 +52,7 @@ function Topbar() {
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 <span className="font-medium">
-                  {user.workspaceName || "Default Workspace"}
+                  {user?.workspaceName || "Default Workspace"}
                 </span>
                 {/* <ChevronDown className="h-4 w-4 text-muted-foreground" /> */}
               </div>
@@ -80,13 +81,20 @@ function Topbar() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuItem className="flex-col items-start p-3">
                   <div className="text-sm font-medium text-foreground mb-1">
-                    {user.firstName || "User"}
+                    {user?.firstName || "User"}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {user.email || "user@example.com"}
+                    {user?.email || "user@example.com"}
                   </div>
                 </DropdownMenuItem>
                 <Separator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => window.location.href = '/projects'}
+                >
+                  <Folder className="mr-2 h-4 w-4" />
+                  <span>Projects</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>Profile</span>

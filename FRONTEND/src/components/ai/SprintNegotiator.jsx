@@ -191,34 +191,34 @@ export function SprintNegotiator({ selectedProject }) {
 
               <div>
                 <h4 className="font-medium mb-2">
-                  Tasks ({sprintPlan.tasks.length})
+                  Tasks ({sprintPlan.taskKeys.length})
                 </h4>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {sprintPlan.tasks.map((task, index) => (
+                  {sprintPlan.taskKeys.map((taskKey, index) => (
                     <div
                       key={index}
                       className="border rounded p-2 flex justify-between items-center"
                     >
                       <div>
-                        <p className="font-medium">{task.title}</p>
+                        <p className="font-medium">{taskKey}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Badge
                             variant={
-                              task.priority === "HIGH"
+                              sprintPlan?.taskPriorities?.[taskKey] === "HIGH"
                                 ? "destructive"
-                                : task.priority === "MEDIUM"
+                                : sprintPlan?.taskPriorities?.[taskKey] === "MEDIUM"
                                 ? "default"
                                 : "outline"
                             }
                             className="text-xs"
                           >
-                            {task.priority}
+                            {sprintPlan?.taskPriorities?.[taskKey]}
                           </Badge>
-                          <span>{task.hours} hours</span>
+                          <span>{sprintPlan?.taskHours?.[taskKey]} hours</span>
                         </div>
                       </div>
                       <div>
-                        {task.included ? (
+                        {sprintPlan?.taskIncluded?.[taskKey] ? (
                           <CheckCircle className="h-5 w-5 text-green-600" />
                         ) : (
                           <XCircle className="h-5 w-5 text-destructive" />

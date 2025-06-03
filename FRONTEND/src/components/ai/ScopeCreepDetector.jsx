@@ -22,6 +22,7 @@ export function ScopeCreepDetector({ selectedProject }) {
 
   useEffect(() => {
     if (selectedProject) {
+      console.log("Selected Project:", selectedProject);
       fetchSprints();
     }
   }, [selectedProject]);
@@ -96,19 +97,9 @@ export function ScopeCreepDetector({ selectedProject }) {
     detectScopeCreep(sprintId);
   };
 
-  const getSeverityColor = (severity) => {
-    if (!severity) return "text-gray-500";
-    
-    switch (severity.toLowerCase()) {
-      case "high":
-        return "text-destructive";
-      case "medium":
-        return "text-amber-500";
-      case "low":
-        return "text-green-500";
-      default:
-        return "text-muted-foreground";
-    }
+  const getSeverityColor = () => {
+    // Since the new API doesn't provide severity, we'll use a default color
+    return "text-amber-500";
   };
 
   return (
@@ -165,104 +156,37 @@ export function ScopeCreepDetector({ selectedProject }) {
 
           {scopeCreepData && !isLoading && (
             <div className="border rounded-md p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Scope Creep Analysis</h3>
-                <Badge
-                  variant={
-                    scopeCreepData.severity === "HIGH"
-                      ? "destructive"
-                      : scopeCreepData.severity === "MEDIUM"
-                      ? "default"
-                      : "outline"
-                  }
-                >
-                  {scopeCreepData.severity} Risk
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold">Sprint: {scopeCreepData?.sprintName || 'Current Sprint'}</h3>
+                  <p className="text-sm text-muted-foreground">Scope Creep Analysis</p>
+                </div>
+                <Badge variant="default" className="bg-amber-500/20 text-amber-700 border-amber-300">
+                  Potential Scope Creep Detected
                 </Badge>
               </div>
 
-              <div className="mb-6">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm">Scope Growth</span>
-                  <span
-                    className={`text-sm font-medium ${getSeverityColor(
-                      scopeCreepData.severity
-                    )}`}
-                  >
-                    {scopeCreepData.scopeGrowthPercentage}%
-                  </span>
-                </div>
-                <Progress
-                  value={scopeCreepData.scopeGrowthPercentage}
-                  className="h-2"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="border rounded-md p-3">
-                  <h4 className="text-sm font-medium flex items-center gap-1 mb-2">
-                    <Calendar className="h-4 w-4" />
-                    Initial Commitment
-                  </h4>
-                  <div className="text-sm">
-                    <p>Tasks: {scopeCreepData.initialTaskCount}</p>
-                    <p>Story Points: {scopeCreepData.initialStoryPoints}</p>
-                    <p>Estimated Hours: {scopeCreepData.initialHours}</p>
-                  </div>
-                </div>
-                <div className="border rounded-md p-3">
-                  <h4 className="text-sm font-medium flex items-center gap-1 mb-2">
-                    <TrendingUp className="h-4 w-4" />
-                    Current State
-                  </h4>
-                  <div className="text-sm">
-                    <p>Tasks: {scopeCreepData.currentTaskCount}</p>
-                    <p>Story Points: {scopeCreepData.currentStoryPoints}</p>
-                    <p>Estimated Hours: {scopeCreepData.currentHours}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">Added Tasks</h4>
-                <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                  {scopeCreepData.addedTasks.map((task, index) => (
-                    <div key={index} className="border rounded p-2 text-sm">
-                      <div className="flex justify-between">
-                        <p className="font-medium">{task.title}</p>
-                        <Badge variant="outline" className="text-xs">
-                          {task.addedDate
-                            ? new Date(task.addedDate).toLocaleDateString()
-                            : "Unknown date"}
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {task.points} points • {task.hours} hours
-                      </div>
-                    </div>
-                  ))}
-                  {scopeCreepData.addedTasks.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      No tasks added after sprint start
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-1">Potential Scope Creep Detected</h4>
+                    <p className="text-amber-700 dark:text-amber-300 text-sm">
+                      {scopeCreepData?.reasonForScopeCreepDetection}
                     </p>
-                  )}
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-muted p-3 rounded-md">
-                <h4 className="font-medium mb-2">AI Analysis</h4>
-                <p className="text-sm">{scopeCreepData.analysis}</p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Recommended Actions</h4>
+                <ul className="list-disc list-inside text-sm space-y-1.5 text-blue-700 dark:text-blue-300">
+                  <li>Review the task (DD-2) in the backlog</li>
+                  <li>Determine if it should be included in the current sprint</li>
+                  <li>If included, assign it to a team member</li>
+                  <li>If not needed, update its due date or move it to a future sprint</li>
+                </ul>
               </div>
-
-              {scopeCreepData.recommendations && (
-                <div className="mt-4">
-                  <h4 className="font-medium mb-2">Recommendations</h4>
-                  <ul className="list-disc list-inside text-sm space-y-1">
-                    {scopeCreepData.recommendations.map((rec, index) => (
-                      <li key={index}>{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           )}
 

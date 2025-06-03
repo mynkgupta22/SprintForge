@@ -35,11 +35,11 @@ public class TaskController {
         return new ResponseEntity<>(taskService.createTask(taskDTO), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{key}")
+    @PutMapping("/{id}")
     public ResponseEntity<TaskDTO> updateTask(
-            @PathVariable String key,
+            @PathVariable Long id,
             @Valid @RequestBody TaskDTO taskDTO) {
-        return ResponseEntity.ok(taskService.updateTask(key, taskDTO));
+        return ResponseEntity.ok(taskService.updateTask(id, taskDTO));
     }
 
     @GetMapping("/{key}")
@@ -84,11 +84,11 @@ public class TaskController {
         return ResponseEntity.ok(taskService.updateTaskStatus(id, status,sprintId));
     }
 
-    @PostMapping("/{key}/move-to-sprint/{sprintId}")
+    @PostMapping("/{id}/move-to-sprint/{sprintId}")
     public ResponseEntity<TaskDTO> moveTaskToSprint(
-            @PathVariable String key,
+            @PathVariable Long id,
             @PathVariable Long sprintId) {
-        return ResponseEntity.ok(taskService.moveTaskToSprint(key, sprintId));
+        return ResponseEntity.ok(taskService.moveTaskToSprint(id, sprintId));
     }
 
     @PostMapping("/{key}/move-to-backlog")

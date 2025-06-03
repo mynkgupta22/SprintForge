@@ -9,7 +9,7 @@ import com.misogi.SprintForge.model.Task.TaskStatus;
 
 public interface TaskService {
     TaskDTO createTask(TaskDTO taskDTO);
-    TaskDTO updateTask(String key, TaskDTO taskDTO);
+    TaskDTO updateTask(Long key, TaskDTO taskDTO);
     TaskDTO getTaskByKey(String key);
     List<TaskDTO> getBacklogTasks(Long projectId);
     List<TaskDTO> getSprintTasks(Long sprintId);
@@ -17,7 +17,7 @@ public interface TaskService {
     List<TaskDTO> getTasksByProjectAndStatus(Long projectId, TaskStatus status);
     void deleteTask(String key);
     TaskDTO updateTaskStatus(Long id, TaskStatus status,Long sprintId);
-    TaskDTO moveTaskToSprint(String key, Long sprintId);
+    TaskDTO moveTaskToSprint(Long key, Long sprintId);
     TaskDTO moveTaskToBacklog(String key);
     Integer getSprintCapacity(Long sprintId);
 	TaskCountDTO getTotalTasks(Long projectId);

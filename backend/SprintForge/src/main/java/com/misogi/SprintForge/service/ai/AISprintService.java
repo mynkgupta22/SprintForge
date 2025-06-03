@@ -135,7 +135,7 @@ public class AISprintService {
             List<Task> tasks = entry.getValue();
             int inProgress = (int) tasks.stream().filter(t -> t.getStatus() == Task.TaskStatus.IN_PROGRESS).count();
             int todo = (int) tasks.stream().filter(t -> t.getStatus() == Task.TaskStatus.TODO).count();
-            int overdue = (int) tasks.stream().filter(t -> t.getDueDate() != null && t.getDueDate().isBefore(java.time.LocalDateTime.now()) && t.getStatus() != Task.TaskStatus.DONE).count();
+            int overdue = (int) tasks.stream().filter(t -> t.getDueDate() != null && t.getDueDate().isBefore(java.time.LocalDate.now()) && t.getStatus() != Task.TaskStatus.DONE).count();
             int totalEstimate = tasks.stream().mapToInt(Task::getEstimate).sum();
             prompt.append("- ").append(user.getFirstName()).append(" ").append(user.getLastName()).append(": ")
                 .append(tasks.size()).append(" tasks (").append(totalEstimate).append("h), ")

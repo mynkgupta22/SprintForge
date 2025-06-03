@@ -1,9 +1,8 @@
 package com.misogi.SprintForge.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -69,7 +68,7 @@ public class Task extends BaseEntity {
     private TaskStatus status = TaskStatus.BACKLOG;
 
     @Column(nullable = false)
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
 
     @Column(nullable = false)
     private Integer storyPoints = 0;

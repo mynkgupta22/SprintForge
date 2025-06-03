@@ -15,16 +15,17 @@ import {
   ListChecks,
   Activity as ActivityIcon,
   Briefcase,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "../ui/button";
 
 const navigation = [
-  { name: "Workspaces", href: "/workspaces", icon: Briefcase },
   { name: "Projects", href: "/projects", icon: Folder },
   { name: "Sprints", href: "/sprints", icon: ListChecks },
   { name: "Board", href: "/board", icon: Kanban },
   { name: "Users", href: "/users", icon: Users },
   { name: "Activity", href: "/activity", icon: ActivityIcon },
+  { name: "AI Features", href: "/ai-features", icon: Sparkles },
 ];
 
 function NavigationBar() {

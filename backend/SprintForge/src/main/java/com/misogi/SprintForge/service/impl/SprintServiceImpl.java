@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.misogi.SprintForge.dto.SprintDTO;
+import com.misogi.SprintForge.exception.BadRequestException;
 import com.misogi.SprintForge.exception.ResourceNotFoundException;
 import com.misogi.SprintForge.model.Project;
 import com.misogi.SprintForge.model.Sprint;
@@ -29,7 +30,12 @@ public class SprintServiceImpl implements SprintService {
     public SprintDTO createSprint(SprintDTO sprintDTO) {
         Project project = projectRepository.findById(sprintDTO.getProjectId())
             .orElseThrow(() -> new ResourceNotFoundException("Project", "id", sprintDTO.getProjectId()));
-        
+        if(sprintDTO.getStatus().equals(SprintStatus.ACTIVE) && !project.getSprints().isEmpty()) {
+        	for(Sprint s: project.getSprints()) {
+        		if(s.getStatus().equals(SprintStatus.ACTIVE))
+        			throw new BadRequestException("Only One Sprint Can Active At A Time.");
+        	}
+        }
         Sprint sprint = mapToEntity(sprintDTO);
         sprint.setProject(project);
         Sprint savedSprint = sprintRepository.save(sprint);
@@ -40,7 +46,14 @@ public class SprintServiceImpl implements SprintService {
     public SprintDTO updateSprint(Long id, SprintDTO sprintDTO) {
         Sprint sprint = sprintRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Sprint", "id", id));
-        
+        Project project = projectRepository.findById(sprintDTO.getProjectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", sprintDTO.getProjectId()));
+            if(sprintDTO.getStatus().equals(SprintStatus.ACTIVE) && !project.getSprints().isEmpty()) {
+            	for(Sprint s: project.getSprints()) {
+            		if(s.getStatus().equals(SprintStatus.ACTIVE) && s.getId() != id)
+            			throw new BadRequestException("Only One Sprint Can Active At A Time.");
+            	}
+            }
         sprint.setName(sprintDTO.getName());
         sprint.setGoal(sprintDTO.getGoal());
         sprint.setStartDate(sprintDTO.getStartDate());

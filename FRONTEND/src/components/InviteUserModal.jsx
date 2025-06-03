@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select } from "./ui/select";
+import { Checkbox } from "./ui/checkbox";
 import { useSelector } from "react-redux";
 import apiHandler from "../functions/apiHandler";
 import { showToast } from "../utils/toast";
@@ -21,12 +22,12 @@ function InviteUserModal({ open, onClose }) {
 
   // Fetch projects for the workspace
   useEffect(() => {
-    if (open && workspaceId && role === "DEVELOPER") {
-      apiHandler({ url: `api/projects?workspaceId=${workspaceId}` }).then((res) => {
+    if (open && role === "DEVELOPER" && user?.id) {
+      apiHandler({ url: `projects/member/${user.id}` }).then((res) => {
         if (res.success) setProjects(res.data.content || res.data);
       });
     }
-  }, [open, workspaceId, role]);
+  }, [open, role, user?.id]);
 
   useEffect(() => {
     if (!open) {
@@ -99,22 +100,38 @@ function InviteUserModal({ open, onClose }) {
           {role === "DEVELOPER" && (
             <div className="mb-4">
               <Label>Projects</Label>
-              <select
-                multiple
-                value={selectedProjects}
-                onChange={(e) =>
-                  setSelectedProjects(
-                    Array.from(e.target.selectedOptions, (opt) => opt.value)
-                  )
-                }
-                className="w-full border rounded p-2 mt-1"
-              >
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
+              <div className="mt-2 max-h-60 overflow-y-auto border rounded p-2">
+                {projects.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No projects available</p>
+                ) : (
+                  projects.map((project) => (
+                    <div key={project.id} className="flex items-center space-x-2 py-1">
+                      <Checkbox
+                        id={`project-${project.id}`}
+                        checked={selectedProjects.includes(project.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedProjects([...selectedProjects, project.id]);
+                          } else {
+                            setSelectedProjects(
+                              selectedProjects.filter((id) => id !== project.id)
+                            );
+                          }
+                        }}
+                      />
+                      <Label
+                        htmlFor={`project-${project.id}`}
+                        className="text-sm cursor-pointer"
+                      >
+                        {project.name}
+                      </Label>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                {selectedProjects.length} project(s) selected
+              </div>
             </div>
           )}
           <div className="flex justify-end gap-2">

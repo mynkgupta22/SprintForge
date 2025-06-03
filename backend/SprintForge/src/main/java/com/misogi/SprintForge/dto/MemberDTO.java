@@ -14,5 +14,6 @@ public class MemberDTO {
 	private String firstName;
 	private String lastName;
 	private String userName;
+	private String role;
 
 }

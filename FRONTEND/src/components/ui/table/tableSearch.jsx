@@ -1,7 +1,12 @@
-import React from 'react';
-import { Input } from '../input';
+import React from "react";
+import { Input } from "../input";
 
-export function TableSearch({ searchQuery, setSearchQuery, searchKey, setSearchKey }) {
+export function TableSearch({
+  searchQuery,
+  setSearchQuery,
+  searchKey,
+  setSearchKey,
+}) {
   return (
     <div className="flex items-center space-x-2">
       <Input

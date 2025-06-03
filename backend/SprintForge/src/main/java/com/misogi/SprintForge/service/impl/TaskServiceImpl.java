@@ -1,6 +1,6 @@
 package com.misogi.SprintForge.service.impl;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,12 +12,12 @@ import com.misogi.SprintForge.dto.TaskCountDTO;
 import com.misogi.SprintForge.dto.TaskDTO;
 import com.misogi.SprintForge.exception.ResourceNotFoundException;
 import com.misogi.SprintForge.model.Activity;
+import com.misogi.SprintForge.model.Activity.ActivityType;
 import com.misogi.SprintForge.model.Project;
 import com.misogi.SprintForge.model.Sprint;
 import com.misogi.SprintForge.model.Task;
 import com.misogi.SprintForge.model.Task.TaskStatus;
 import com.misogi.SprintForge.model.User;
-import com.misogi.SprintForge.model.Activity.ActivityType;
 import com.misogi.SprintForge.repository.ActivityRepository;
 import com.misogi.SprintForge.repository.ProjectRepository;
 import com.misogi.SprintForge.repository.SprintRepository;
@@ -63,13 +63,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO updateTask(String key, TaskDTO taskDTO) {
-        Task task = taskRepository.findByKey(key)
+    public TaskDTO updateTask(Long key, TaskDTO taskDTO) {
+        Task task = taskRepository.findById(key)
             .orElseThrow(() -> new ResourceNotFoundException("Task", "key", key));
+        if(taskDTO.getAssignee() != null) {
         Optional<User> user = userRepository.findById(taskDTO.getAssignee());
+        task.setAssignee(user.get());
+
+        }
         task.setTitle(taskDTO.getTitle());
         task.setDescription(taskDTO.getDescription());
-        task.setAssignee(user.get());
         task.setTags(taskDTO.getTags());
         task.setPriority(taskDTO.getPriority());
         task.setStatus(taskDTO.getStatus());
@@ -151,9 +154,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO moveTaskToSprint(String key, Long sprintId) {
-        Task task = taskRepository.findByKey(key)
-            .orElseThrow(() -> new ResourceNotFoundException("Task", "key", key));
+    public TaskDTO moveTaskToSprint(Long id, Long sprintId) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Task", "key", id));
         Sprint sprint = sprintRepository.findById(sprintId)
             .orElseThrow(() -> new ResourceNotFoundException("Sprint", "id", sprintId));
         
@@ -207,6 +210,7 @@ public class TaskServiceImpl implements TaskService {
         dto.setProjectId(task.getProject().getId());
         dto.setSprintId(task.getSprint() != null ? task.getSprint().getId() : null);
         dto.setAssignee(task.getAssignee() != null ? task.getAssignee().getId() : null);
+        dto.setAssigneeName(task.getAssignee() != null ? task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName() : null);
         dto.setTags(task.getTags());
         dto.setPriority(task.getPriority());
         dto.setStatus(task.getStatus());
@@ -243,7 +247,7 @@ public class TaskServiceImpl implements TaskService {
         	else if(task.getStatus().equals(TaskStatus.IN_REVIEW)) {
         		inReviewTasks++;
         	}
-        	if(!task.getStatus().equals(TaskStatus.DONE) && task.getDueDate() != null && task.getDueDate().isAfter(LocalDateTime.now())) {
+        	if(!task.getStatus().equals(TaskStatus.DONE) && task.getDueDate() != null && task.getDueDate().isAfter(LocalDate.now())) {
         		dueIssue++;
         	}
         }

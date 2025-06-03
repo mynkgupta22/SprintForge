@@ -92,6 +92,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setType(dto.getType());
         activity.setDescription(dto.getDescription());
         activity.setActor(user.get());
+        dto.setTaskTitle(activity.getTask().getTitle());
         activity.setOldValue(dto.getOldValue());
         activity.setNewValue(dto.getNewValue());
         return activity;

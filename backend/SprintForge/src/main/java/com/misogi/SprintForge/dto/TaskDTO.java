@@ -1,5 +1,6 @@
 package com.misogi.SprintForge.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,13 +31,14 @@ public class TaskDTO {
     private String sprintName;
     
     private Long assignee;
+    private String assigneeName;
     
     private Set<String> tags = new HashSet<>();
     private TaskPriority priority = TaskPriority.MEDIUM;
     private TaskStatus status = TaskStatus.BACKLOG;
     
 //    @NotNull(message = "Due date is required")
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
     
     private Integer storyPoints = 0;
     private Integer estimate = 0;
@@ -69,7 +71,7 @@ class TaskCreateRequest {
     private TaskPriority priority = TaskPriority.MEDIUM;
     
     @NotNull(message = "Due date is required")
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
     
     private Integer storyPoints = 0;
     private Integer estimate = 0;
@@ -84,7 +86,7 @@ class TaskUpdateRequest {
     private Set<String> tags;
     private TaskPriority priority;
     private TaskStatus status;
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
     private Integer storyPoints;
     private Integer estimate;
 }

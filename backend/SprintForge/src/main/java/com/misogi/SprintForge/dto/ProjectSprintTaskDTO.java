@@ -46,7 +46,6 @@ public class ProjectSprintTaskDTO {
 
     @Data
     public static class TasksDto {
-    	private Long taskId;
         private String title;
         private String description;
         private String key;
@@ -54,13 +53,12 @@ public class ProjectSprintTaskDTO {
         private String status;
         private Integer storyPoints;
         private Integer estimate;
-        private LocalDateTime dueDate;
+        private LocalDate dueDate;
 
         private AssigneeDTO assignee;
 
-        public TasksDto(Long taskId,String title, String description, String key, String priority, String status,
-                       Integer storyPoints, Integer estimate, LocalDateTime dueDate, AssigneeDTO assignee) {
-        	this.taskId = taskId;
+        public TasksDto(String title, String description, String key, String priority, String status,
+                       Integer storyPoints, Integer estimate, LocalDate dueDate, AssigneeDTO assignee) {
             this.title = title;
             this.description = description;
             this.key = key;
@@ -78,14 +76,12 @@ public class ProjectSprintTaskDTO {
 
     @Data
     public static class AssigneeDTO {
-        private Long id;
         private String firstName;
         private String lastName;
         private String email;
         private String role;
 
-        public AssigneeDTO(Long id, String firstName, String lastName, String email, String role) {
-            this.id = id;
+        public AssigneeDTO( String firstName, String lastName, String email, String role) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.email = email;

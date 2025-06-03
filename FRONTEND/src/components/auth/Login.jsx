@@ -43,7 +43,7 @@ function Login() {
       // Save user data and token to Redux store
       dispatch(setUser(user));
       dispatch(setToken({ token }));
-      navigate("/workspaces");
+      navigate("/projects");
     }
   };
 

@@ -132,6 +132,7 @@ public class ProjectServiceImpl implements ProjectService {
         		memberDto.setLastName(user.getLastName());
         		memberDto.setId(user.getId());
         		memberDto.setUserName(user.getUsername());
+        		memberDto.setRole(user.getRoles().name());
         		totalMember++;
         		memberList.add(memberDto);
         		}
@@ -169,6 +170,7 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 		SprintDTO sprintDTO = new SprintDTO();
 		Sprint sprint = sprintRepository.findByProjectAndStatus(project, SprintStatus.ACTIVE);
+		if(sprint != null) {
 		List<Task> taskList = taskRepository.findBySprintAndStatusNot(sprint,TaskStatus.BACKLOG);
 		sprintDTO.setId(sprint.getId());
 		sprintDTO.setName(sprint.getName());
@@ -185,6 +187,7 @@ public class ProjectServiceImpl implements ProjectService {
 				taskDTO.setDescription(task.getDescription());
 				taskDTO.setKey(task.getKey());
 				taskDTO.setAssignee(task.getAssignee() != null ? task.getAssignee().getId() : null);
+				taskDTO.setAssigneeName(task.getAssignee() != null ? task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName() : null);
 				taskDTO.setTags(task.getTags());
 				taskDTO.setPriority(task.getPriority());
 				taskDTO.setStatus(task.getStatus());
@@ -194,6 +197,7 @@ public class ProjectServiceImpl implements ProjectService {
 	    }
 	    sprintDTO.setTasks(taskDtoList);
 		dto.setActiveSprint(sprintDTO);
+		}
 		dto.setBacklogTasks(tds);
 		dto.setId(project.getId());
 		dto.setName(project.getName());
@@ -264,7 +268,6 @@ public class ProjectServiceImpl implements ProjectService {
 
 	    if (assignee != null) {
 	        assigneeDTO = new AssigneeDTO(
-	            assignee.getId(),
 	            assignee.getFirstName(),
 	            assignee.getLastName(),
 	            assignee.getEmail(),

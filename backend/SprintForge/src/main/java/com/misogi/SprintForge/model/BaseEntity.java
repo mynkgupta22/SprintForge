@@ -22,11 +22,11 @@ public abstract class BaseEntity {
     private Long id;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(nullable = true, updatable = false)
+    private LocalDateTime createdAt ;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime updatedAt;
 
     @CreatedBy
@@ -35,4 +35,19 @@ public abstract class BaseEntity {
 
     @LastModifiedBy
     private Long updatedBy;
+    
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 } 

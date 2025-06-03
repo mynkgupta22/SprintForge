@@ -3,6 +3,8 @@ package com.misogi.SprintForge.controller;
 import com.misogi.SprintForge.dto.InviteDTO;
 import com.misogi.SprintForge.enums.Role;
 import com.misogi.SprintForge.service.InviteService;
+import com.misogi.SprintForge.service.contextService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +19,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InviteController {
     private final InviteService inviteService;
+    private final contextService contextService;
 
     @PostMapping
 //    @PreAuthorize("hasRole('ADMIN') or hasRole('PM')")
-    public ResponseEntity<?> createInvite(@RequestBody InviteDTO inviteDTO, Authentication authentication) {
+    public ResponseEntity<?> createInvite(@RequestBody InviteDTO inviteDTO) {
         // Get current user role
-        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
-        boolean isPM = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("PM"));
+        boolean isAdmin = contextService.getCurrentUser().getRoles().equals(Role.ADMIN);
+        boolean isPM = contextService.getCurrentUser().getRoles().equals(Role.PM);
 
         // Admin can invite PM or Developer
         // PM can only invite Developer

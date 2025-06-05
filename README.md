@@ -4,7 +4,7 @@ A modern Jira-like Kanban/Sprint management tool with powerful AI-driven feature
 
 ## Live Demo
 
-Access the live deployed application at: [https://sprintforge-app.windsurf.build/](https://sprintforge-app.windsurf.build/)
+Access the live deployed application at: [https://sprintforge-app-v2.windsurf.build/](https://sprintforge-app-v2.windsurf.build/)
 
 ## Overview
 
